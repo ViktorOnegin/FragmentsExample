@@ -15,6 +15,7 @@ namespace Fragments
 {
     public class TitlesFragment : ListFragment
     {
+        bool showingTwoFragments;
         int selectedPlayID;
 
         public TitlesFragment()
@@ -32,6 +33,15 @@ namespace Fragments
                 selectedPlayID = savedInstanceState.GetInt("current_play_id", 0);
 
             }
+
+            var quoteContainer = Activity.FindViewById(Resource.Id.playquote_container);
+            showingTwoFragments = quoteContainer != null &&
+                                    quoteContainer.Visibility == ViewStates.Visible;
+            if (showingTwoFragments)
+            {
+                ListView.ChoiceMode = ChoiceMode.Single;
+                ShowPlayQuote(selectedPlayID);
+            }
         }
 
         public override void OnSaveInstanceState(Bundle outState)
@@ -47,9 +57,29 @@ namespace Fragments
 
         void ShowPlayQuote(int PlayID)
         {
-            var intent = new Intent(Activity, typeof(PlayQuoteActivity));
-            intent.PutExtra("current_play_id", PlayID);
-            StartActivity(intent);
+            selectedPlayID = PlayID;
+            if (showingTwoFragments)
+            {
+                ListView.SetItemChecked(selectedPlayID, true);
+
+                var playQuoteFragment = FragmentManager.FindFragmentById(Resource.Id.playquote_container) as PlayQuoteFragment;
+
+                if (playQuoteFragment == null || playQuoteFragment.PlayID != PlayID)
+                {
+                    var container = Activity.FindViewById(Resource.Id.playquote_container);
+                    var quoteFrag = PlayQuoteFragment.NewInstance(selectedPlayID);
+
+                    FragmentTransaction ft = FragmentManager.BeginTransaction();
+                    ft.Replace(Resource.Id.playquote_container, quoteFrag);
+                    ft.Commit();
+                }
+            }
+            else
+            {
+                var intent = new Intent(Activity, typeof(PlayQuoteActivity));
+                intent.PutExtra("current_play_id", PlayID);
+                StartActivity(intent);
+            }
         }
     }
 }

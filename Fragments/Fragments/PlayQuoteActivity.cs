@@ -19,12 +19,16 @@ namespace Fragments
         {
             base.OnCreate(savedInstanceState);
 
-            var PlayID = Intent.Extras.GetInt("cuttent_play_id", 0);
+            if (Resources.Configuration.Orientation == Android.Content.Res.Orientation.Landscape)
+            {
+                Finish();
+            }
 
-            var detailsFrag = PlayQuoteFragment.NewInstance(PlayID);
+            var playId = Intent.Extras.GetInt("current_play_id", 0);
+            var playQuoteFrag = PlayQuoteFragment.NewInstance(playId);
             FragmentManager.BeginTransaction()
-                .Add(Android.Resource.Id.Content, detailsFrag)
-                .Commit();
+                            .Add(Android.Resource.Id.Content, playQuoteFrag)
+                            .Commit();
         }
     }
 }
